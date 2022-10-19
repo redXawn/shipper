@@ -35,6 +35,12 @@ export const alignCenter = css({
   alignItems: 'center',
 });
 
+export const hideMobileSize = css({
+  '@media (max-width: 760px)': {
+    display: 'none !important',
+  },
+});
+
 export const fontSize8 = css({
   fontSize: '8px',
 });

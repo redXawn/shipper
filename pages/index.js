@@ -4,8 +4,9 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { setInitialData, changePage, findUser } from '../redux/action/listDataAction';
+import { setInitialData, changePage, findUser, scrollPage } from '../redux/action/listDataAction';
 import { setLoading, setUnload } from '../redux/action/loadingAction';
+import InfiniteScrolling from '../utils/infiniteScroll';
 
 import MagnifyIcon from '../assets/magnifying-glass-solid.svg';
 import PlusIcon from '../assets/plus-solid.svg';
@@ -16,6 +17,7 @@ import {
   homeHeader,
   homeBody,
   homeFooter,
+  homeHeaderComponentWrapper,
   buttonAddDriver,
   inputDriverWrapper,
   inputDriver,
@@ -24,6 +26,8 @@ import {
   cardHeader,
   cardBody,
   cardPicture,
+  cardPictureWrapper,
+  cardDetailWrapper,
   footerButton,
 } from '../styles/pages/home';
 import {
@@ -40,13 +44,14 @@ import {
   flexColumn,
   fontSize10,
   marginBottom4,
-  marginBottom16,
-  marginTop8,
   cursorPointer,
+  hideMobileSize,
 } from '../styles/variable';
 import { getToken, setToken } from '../utils/token';
 
 const Home = () => {
+  InfiniteScrolling(scrollMobileView);
+
   const dispatch = useDispatch();
   const { listData, filterData, showData, totalData, totalPage, currentPage } = useSelector((state) => state.listData);
   const [inputText, setInputText] = useState('');
@@ -80,9 +85,15 @@ const Home = () => {
     return () => clearTimeout(timeoutId);
   }, [inputText]);
 
+  function scrollMobileView() {
+    if (currentPage < totalPage) {
+      dispatch(scrollPage());
+    }
+  }
+
   function renderCard() {
-    return showData.map((item) => (
-      <div key={item} className={cardWrapper}>
+    return showData.map((item, index) => (
+      <div key={index} className={cardWrapper}>
         <div className={cardHeader}>
           <label className={`${fontSize12} ${grayColor}`}>
             Driver ID <span className={mainColor}>{item.id.value}</span>
@@ -92,10 +103,10 @@ const Home = () => {
           </div>
         </div>
         <div className={cardBody}>
-          <div className={`${marginBottom16} ${marginTop8}`}>
-            <Image className={cardPicture} width={60} height={60} src={item.picture.medium} alt="User Icon" />
+          <div className={cardPictureWrapper}>
+            <Image className={cardPicture} layout="fill" src={item.picture.medium} alt="User Icon" />
           </div>
-          <div>
+          <div className={cardDetailWrapper}>
             <div className={`${flexColumn} ${marginBottom8}`}>
               <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Nama Driver</label>
               <label className={`${fontSize14}`}>
@@ -106,11 +117,11 @@ const Home = () => {
               <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Telepon</label>
               <label className={`${fontSize14}`}>{item.cell}</label>
             </div>
-            <div className={`${flexColumn} ${marginBottom8}`}>
+            <div className={`${hideMobileSize} ${flexColumn} ${marginBottom8}`}>
               <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Email</label>
               <label className={`${fontSize14}`}>{item.email}</label>
             </div>
-            <div className={`${flexColumn} ${marginBottom8}`}>
+            <div className={`${hideMobileSize} ${flexColumn} ${marginBottom8}`}>
               <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Tanggal Lahir</label>
               <label className={`${fontSize14}`}>{dayjs(item.dob.date).format('DD-MM-YYYY')}</label>
             </div>
@@ -127,7 +138,7 @@ const Home = () => {
           <h2 className={`${mainColor} ${marginBottom8}`}>DRIVER MANAGEMENT</h2>
           <label className={`${fontSize12} ${grayColor}`}>Data driver yang bekerja dengan Anda.</label>
         </div>
-        <div className={displayFlex}>
+        <div className={homeHeaderComponentWrapper}>
           <div className={`${inputDriverWrapper} ${marginRight16}`}>
             <span className={inputDriverIcon}>
               <Image height={15} width={15} src={MagnifyIcon} alt="Magnify Icon" />
@@ -143,7 +154,7 @@ const Home = () => {
         </div>
       </div>
       <div className={homeBody}>{showData.length > 0 ? renderCard() : <h2>No driver found</h2>}</div>
-      <div className={homeFooter}>
+      <div className={`${homeFooter} ${hideMobileSize}`}>
         <button
           disabled={currentPage === 1 || showData.length === 0}
           className={footerButton}

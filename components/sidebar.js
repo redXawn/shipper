@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 
 import { sidebarContainer, sidebarLabel, sidebarOption, sidebarOptionActive } from '../styles/components/sidebar';
+import { hideMobileSize } from '../styles/variable';
 import HouseIcon from '../assets/house-solid.svg';
 import UserIcon from '../assets/circle-user-solid.svg';
 import CalendarIcon from '../assets/calendar-days-solid.svg';
@@ -26,7 +27,7 @@ const Sidebar = () => {
     ));
   }
 
-  return <div className={sidebarContainer}>{renderRoutes()}</div>;
+  return <div className={`${sidebarContainer} ${hideMobileSize}`}>{renderRoutes()}</div>;
 };
 
 export default Sidebar;

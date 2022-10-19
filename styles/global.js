@@ -25,4 +25,8 @@ export const bodyWrapper = css({
   width: 'calc(100% - 220px)',
   background: '#F6F8FA;',
   padding: '32px',
+  '@media (max-width: 760px)': {
+    width: '100%',
+    padding: '16px',
+  },
 });

@@ -20,3 +20,13 @@ export const navbarProfilePic = css({
   width: '40px',
   height: '40px',
 });
+
+export const navbarMenu = css({
+  display: 'none',
+  width: '20px',
+  height: '20px',
+  marginRight: '16px',
+  '@media (max-width: 760px)': {
+    display: 'block',
+  },
+});

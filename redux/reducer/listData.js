@@ -31,6 +31,18 @@ const listDataReducer = (state = initialState, action) => {
         showData: newShowData,
         currentPage: newCurrentPage,
       };
+    case 'SCROLL_PAGE':
+      const scrollCurrentPage = state.currentPage + 1;
+      const scrollStartIndex = scrollCurrentPage * 5 - 5;
+      const scrollShowData = (state.filterData.length > 0 ? state.filterData : state.listData).slice(
+        scrollStartIndex,
+        scrollStartIndex + 5
+      );
+      return {
+        ...state,
+        showData: [...state.showData, ...scrollShowData],
+        currentPage: scrollCurrentPage,
+      };
     case 'FIND_USER':
       let filterData, showFilterData, filterTotalData, filterTotalPage, filterCurrentPage;
       if (action.payload) {
@@ -40,6 +52,7 @@ const listDataReducer = (state = initialState, action) => {
         showFilterData = filterData.slice(0, 5);
         filterTotalData = filterData.length;
       } else {
+        // set data as default if input is empty
         filterData = [];
         showFilterData = state.listData.slice(0, 5);
         filterTotalData = state.listData.length;
