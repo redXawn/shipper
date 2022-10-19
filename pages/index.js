@@ -76,7 +76,7 @@ const Home = () => {
       console.log('error', error);
     }
     dispatch(setUnload());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     getData();
@@ -88,7 +88,7 @@ const Home = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [inputText]);
+  }, [inputText, dispatch]);
 
   function scrollMobileView() {
     if (currentPage < totalPage) {
