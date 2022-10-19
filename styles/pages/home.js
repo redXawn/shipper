@@ -70,6 +70,10 @@ export const cardHeader = css({
   borderBottom: '1px solid #c6c6c6',
 });
 
+export const cardPicture = css({
+  borderRadius: '30px',
+});
+
 export const cardBody = css({
   display: 'flex',
   flexDirection: 'column',
@@ -88,5 +92,14 @@ export const footerButton = css({
   },
   ':active': {
     opacity: '0.6',
+  },
+  ':disabled': {
+    cursor: 'unset',
+    ':active': {
+      opacity: '1',
+    },
+    ':hover': {
+      opacity: '1',
+    },
   },
 });

@@ -1,4 +1,11 @@
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { setInitialData, changePage, findUser } from '../redux/action/listDataAction';
+import { setLoading, setUnload } from '../redux/action/loadingAction';
 
 import MagnifyIcon from '../assets/magnifying-glass-solid.svg';
 import PlusIcon from '../assets/plus-solid.svg';
@@ -16,6 +23,7 @@ import {
   cardWrapper,
   cardHeader,
   cardBody,
+  cardPicture,
   footerButton,
 } from '../styles/pages/home';
 import {
@@ -36,14 +44,81 @@ import {
   marginTop8,
   cursorPointer,
 } from '../styles/variable';
+import { getToken, setToken } from '../utils/token';
 
 const Home = () => {
-  const cardDetail = [
-    { label: 'Nama Driver', value: 'First Name Last Name' },
-    { label: 'Telepon', value: 'Phone Number' },
-    { label: 'Email', value: 'Email Address' },
-    { label: 'Tanggal Lahir', value: 'DD-MM-YYYY' },
-  ];
+  const dispatch = useDispatch();
+  const { listData, filterData, showData, totalData, totalPage, currentPage } = useSelector((state) => state.listData);
+  const [inputText, setInputText] = useState('');
+
+  const getData = useCallback(async () => {
+    try {
+      const getlocalData = getToken('userData');
+      if (getlocalData) {
+        const parseData = JSON.parse(getlocalData);
+        dispatch(setInitialData(parseData));
+      } else {
+        const getUser = await axios.get('https://randomuser.me/api/?results=30');
+        const { results } = getUser.data;
+        setToken('userData', JSON.stringify(results));
+        dispatch(setInitialData(results));
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getData();
+  }, [getData]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      dispatch(findUser(inputText));
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [inputText]);
+
+  function renderCard() {
+    return showData.map((item) => (
+      <div key={item} className={cardWrapper}>
+        <div className={cardHeader}>
+          <label className={`${fontSize12} ${grayColor}`}>
+            Driver ID <span className={mainColor}>{item.id.value}</span>
+          </label>
+          <div className={cursorPointer}>
+            <Image height={20} width={20} src={ElipsisIcon} alt="Elipsis Icon" />
+          </div>
+        </div>
+        <div className={cardBody}>
+          <div className={`${marginBottom16} ${marginTop8}`}>
+            <Image className={cardPicture} width={60} height={60} src={item.picture.medium} alt="User Icon" />
+          </div>
+          <div>
+            <div className={`${flexColumn} ${marginBottom8}`}>
+              <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Nama Driver</label>
+              <label className={`${fontSize14}`}>
+                {item.name.first} {item.name.last}
+              </label>
+            </div>
+            <div className={`${flexColumn} ${marginBottom8}`}>
+              <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Telepon</label>
+              <label className={`${fontSize14}`}>{item.cell}</label>
+            </div>
+            <div className={`${flexColumn} ${marginBottom8}`}>
+              <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Email</label>
+              <label className={`${fontSize14}`}>{item.email}</label>
+            </div>
+            <div className={`${flexColumn} ${marginBottom8}`}>
+              <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>Tanggal Lahir</label>
+              <label className={`${fontSize14}`}>{dayjs(item.dob.date).format('DD-MM-YYYY')}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    ));
+  }
 
   return (
     <div>
@@ -57,7 +132,7 @@ const Home = () => {
             <span className={inputDriverIcon}>
               <Image height={15} width={15} src={MagnifyIcon} alt="Magnify Icon" />
             </span>
-            <input className={inputDriver} placeholder="Cari Driver" />
+            <input className={inputDriver} placeholder="Cari Driver" onChange={(e) => setInputText(e.target.value)} />
           </div>
           <button className={buttonAddDriver}>
             TAMBAH DRIVER
@@ -67,36 +142,20 @@ const Home = () => {
           </button>
         </div>
       </div>
-      <div className={homeBody}>
-        {[1, 2, 3, 4].map((item) => (
-          <div key={item} className={cardWrapper}>
-            <div className={cardHeader}>
-              <label className={`${fontSize12} ${grayColor}`}>
-                Driver ID <span className={mainColor}>123456</span>
-              </label>
-              <div className={cursorPointer}>
-                <Image height={20} width={20} src={ElipsisIcon} alt="Elipsis Icon" />
-              </div>
-            </div>
-            <div className={cardBody}>
-              <div className={`${marginBottom16} ${marginTop8}`}>
-                <Image width={60} height={60} src={UserIcon} alt="User Icon" />
-              </div>
-              <div>
-                {cardDetail.map((item) => (
-                  <div className={`${flexColumn} ${marginBottom8}`}>
-                    <label className={`${fontSize10} ${grayColor} ${marginBottom4}`}>{item.label}</label>
-                    <label className={`${fontSize14}`}>{item.value}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className={homeBody}>{showData.length > 0 ? renderCard() : <h2>No driver found</h2>}</div>
       <div className={homeFooter}>
-        <button className={footerButton}>{'< Previous Page'}</button>
-        <button className={footerButton}>{'Next Page >'}</button>
+        <button
+          disabled={currentPage === 1 || showData.length === 0}
+          className={footerButton}
+          onClick={() => dispatch(changePage('prev'))}>
+          {'< Previous Page'}
+        </button>
+        <button
+          disabled={currentPage === totalPage || showData.length === 0}
+          className={footerButton}
+          onClick={() => dispatch(changePage('next'))}>
+          {'Next Page >'}
+        </button>
       </div>
     </div>
   );
