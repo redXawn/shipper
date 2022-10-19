@@ -14,6 +14,10 @@ injectGlobal`
     color: inherit;
     text-decoration: none;
   }
+
+  h1, h2, h3, h4, h5 {
+    margin: 0;
+  }
 `;
 
 export const bodyWrapper = css({
