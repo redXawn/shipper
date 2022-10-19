@@ -34,7 +34,7 @@ export const homeHeaderComponentWrapper = css({
 
 export const homeBody = css({
   display: 'flex',
-  overflowX: 'scroll',
+  overflowX: 'auto',
   padding: '16px 0',
   '@media (max-width: 760px)': {
     flexDirection: 'column',

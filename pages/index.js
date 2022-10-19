@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setInitialData, changePage, findUser, scrollPage } from '../redux/action/listDataAction';
 import { setLoading, setUnload } from '../redux/action/loadingAction';
 import InfiniteScrolling from '../utils/infiniteScroll';
+import { Skeleton } from '../components';
 
 import MagnifyIcon from '../assets/magnifying-glass-solid.svg';
 import PlusIcon from '../assets/plus-solid.svg';
@@ -46,6 +47,7 @@ import {
   marginBottom4,
   cursorPointer,
   hideMobileSize,
+  marginTop8,
 } from '../styles/variable';
 import { getToken, setToken } from '../utils/token';
 
@@ -54,9 +56,11 @@ const Home = () => {
 
   const dispatch = useDispatch();
   const { listData, filterData, showData, totalData, totalPage, currentPage } = useSelector((state) => state.listData);
+  const { loading } = useSelector((state) => state.loading);
   const [inputText, setInputText] = useState('');
 
   const getData = useCallback(async () => {
+    dispatch(setLoading());
     try {
       const getlocalData = getToken('userData');
       if (getlocalData) {
@@ -71,6 +75,7 @@ const Home = () => {
     } catch (error) {
       console.log('error', error);
     }
+    dispatch(setUnload());
   }, []);
 
   useEffect(() => {
@@ -92,6 +97,34 @@ const Home = () => {
   }
 
   function renderCard() {
+    if (loading) {
+      return [1, 2, 3, 4, 5].map((item, index) => (
+        <div key={index} className={cardWrapper}>
+          <div className={cardHeader}>
+            <Skeleton height={18} width={90} />
+          </div>
+          <div className={cardBody}>
+            <div className={cardPictureWrapper}>
+              <Skeleton height={96} width={96} />
+            </div>
+            <div className={marginTop8}>
+              <div className={`${flexColumn}`}>
+                <Skeleton height={18} width={90} />
+              </div>
+              <div className={`${flexColumn}`}>
+                <Skeleton height={18} width={90} />
+              </div>
+              <div className={`${hideMobileSize} ${flexColumn}`}>
+                <Skeleton height={18} width={90} />
+              </div>
+              <div className={`${hideMobileSize} ${flexColumn}`}>
+                <Skeleton height={18} width={90} />
+              </div>
+            </div>
+          </div>
+        </div>
+      ));
+    }
     return showData.map((item, index) => (
       <div key={index} className={cardWrapper}>
         <div className={cardHeader}>
@@ -153,7 +186,8 @@ const Home = () => {
           </button>
         </div>
       </div>
-      <div className={homeBody}>{showData.length > 0 ? renderCard() : <h2>No driver found</h2>}</div>
+      <div>{showData.length === 0 && !loading && <h2>No driver found</h2>}</div>
+      <div className={homeBody}>{renderCard()}</div>
       <div className={`${homeFooter} ${hideMobileSize}`}>
         <button
           disabled={currentPage === 1 || showData.length === 0}
